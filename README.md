@@ -21,11 +21,17 @@ An example server.conf
 
 ```bash
 
-## create server.conf
-
+# download code
 git clone https://github.com/superp00t/jflx.git
+# go into josh flicks directory
 cd jflx
+# now you should create your server.conf in this directory
+
+# build the server code
 go build github.com/superp00t/jflx/cmd/jflx_server -o jflx_server
+# run your server (linux)
 ./jflx_server
+# or on windows
+jflx_server.exe
 
 ```
