@@ -28,7 +28,7 @@ cd jflx
 # now you should create your server.conf in this directory
 
 # build the server code
-go build github.com/superp00t/jflx/cmd/jflx_server -o jflx_server
+go build -o jflx_server github.com/superp00t/jflx/cmd/jflx_server
 # run your server (linux)
 ./jflx_server
 # or on windows
