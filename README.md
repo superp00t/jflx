@@ -1,5 +1,24 @@
 # josh flicks
 
+An example server.conf
+
+```json
+{
+ "ListenAddress": "0.0.0.0:38088",
+ "TMDBScrapeKey": "<your TMDB scraping API key here>",
+ "Volumes": [
+  {
+    "Kinds": "movie",
+    "Handle": "Film",
+    "Sources": [
+      "/var/film1/",
+      "/media/external_film_drive/"
+    ]
+  }
+ ]
+}
+```
+
 ```bash
 
 ## create server.conf
