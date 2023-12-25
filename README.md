@@ -2,10 +2,10 @@
 
 An example server.conf:
 
-- `"ListenAddress"``
-  - the IP address to bind to.
-- `"TMDBScrapeKey"``
-  - You need an API key for the Movie Database to use metadata scraping.
+- `"ListenAddress"`
+  > the IP address to bind to.
+- `"TMDBScrapeKey"`
+  > You need an API key for the Movie Database to use metadata scraping.
 
 ```json
 {
