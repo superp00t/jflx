@@ -99,6 +99,14 @@ func ngxTime(t time.Time) string {
 		t.Minute())
 }
 
+func isPrivateAccessName(name string) bool {
+	if name[0] == '.' {
+		return true
+	}
+
+	return false
+}
+
 func dirList(w http.ResponseWriter, r *http.Request, f http.File) {
 	// Prefer to use ReadDir instead of Readdir,
 	// because the former doesn't require calling
@@ -130,6 +138,10 @@ func dirList(w http.ResponseWriter, r *http.Request, f http.File) {
 		isDir := dirs.isDir(i)
 
 		name := dirs.name(i)
+		if isPrivateAccessName(name) {
+			continue
+		}
+
 		if isDir {
 			name += "/"
 		}
@@ -159,6 +171,12 @@ func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name 
 	// which would be a problem running under StripPrefix
 	if strings.HasSuffix(r.URL.Path, indexPage) {
 		localRedirect(w, r, "./")
+		return
+	}
+
+	// Ignore . prefixed paths
+	if strings.Contains(r.URL.Path, "/.") {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
