@@ -77,11 +77,10 @@ func (s *Server) Init(cfg *conf.Server) error {
 	s.LoadVolumes()
 
 	s.WebServer = &http.Server{
-		Handler: s,
-		Addr:    s.Conf.ListenAddress,
-		// Good practice: enforce timeouts for servers you create!
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+		Handler:      s,
+		Addr:         s.Conf.ListenAddress,
+		WriteTimeout: 15 * time.Minute,
+		ReadTimeout:  15 * time.Minute,
 	}
 	return nil
 }
