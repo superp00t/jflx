@@ -52,12 +52,15 @@ func (t *TMDBScraper) AskMovie(q *MovieQuestion) (*MovieAnswer, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	ma.Uniqueid.Type = "tmdb"
+	ma.Uniqueid.Default = "true"
+	ma.Uniqueid.Text = strconv.FormatInt(int64(id), 10)
 	ma.Title = details.Title
 	ma.Originaltitle = details.OriginalTitle
 	ma.Plot = details.Overview
 	ma.Tagline = details.Tagline
 	ma.Premiered = details.ReleaseDate
+	ma.Tagline = details.Tagline
 
 	if details.PosterPath != "" {
 		ma.PosterURL = tmdb.GetImageURL(details.PosterPath, tmdb.Original)
