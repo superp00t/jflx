@@ -2,7 +2,7 @@ package nfo
 
 import (
 	"encoding/xml"
-	"io/ioutil"
+	"os"
 )
 
 type Movie struct {
@@ -30,11 +30,11 @@ func (m *Movie) Write(filename string) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filename, b, 0700)
+	return os.WriteFile(filename, b, 0700)
 }
 
 func (m *Movie) Read(filename string) error {
-	b, err := ioutil.ReadFile(filename)
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
