@@ -2,10 +2,7 @@ module github.com/superp00t/jflx
 
 go 1.22.0
 
-require (
-	github.com/cyruzin/golang-tmdb v1.6.1
-	github.com/gorilla/mux v1.8.1
-)
+require github.com/cyruzin/golang-tmdb v1.6.1
 
 require (
 	github.com/json-iterator/go v1.1.12 // indirect

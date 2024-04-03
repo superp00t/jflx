@@ -8,7 +8,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/superp00t/jflx/cache"
 	"github.com/superp00t/jflx/conf"
 	"github.com/superp00t/jflx/media"
@@ -17,7 +16,7 @@ import (
 
 type Server struct {
 	Conf           *conf.Server
-	Router         *mux.Router
+	Router         *http.ServeMux
 	WebServer      *http.Server
 	Volumes        map[string]*Volume
 	scraper        meta.Source
@@ -48,8 +47,7 @@ func (s *Server) LoadVolumes() {
 
 		volumePrefix := fmt.Sprintf("/media/%s/", vol.Conf.Handle)
 
-		route := s.Router.PathPrefix(volumePrefix)
-		route.Handler(http.StripPrefix(volumePrefix, vol.Handler))
+		s.Router.Handle(volumePrefix, http.StripPrefix(volumePrefix, vol.Handler))
 
 		s.Volumes[vol.Conf.Handle] = vol
 	}
@@ -85,10 +83,9 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 func (s *Server) Init(cfg *conf.Server) error {
 	s.Conf = cfg
-	r := mux.NewRouter()
-	s.Router = r
-	r.HandleFunc("POST /api/v1/refresh", s.handle_post_refresh)
-	r.HandleFunc("GET /media/", s.handle_get_list_volumes)
+	s.Router = http.NewServeMux()
+	s.Router.HandleFunc("POST /api/v1/refresh", s.handle_post_refresh)
+	s.Router.HandleFunc("/media/", s.handle_get_list_volumes)
 
 	s.LoadVolumes()
 
