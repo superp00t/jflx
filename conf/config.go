@@ -76,6 +76,10 @@ type Volume struct {
 	Handle string
 	// Sources: the
 	Sources []string
+	// Cache: The directory to store a cache.
+	Cache string
+	// MaxCacheSize: the amount of bytes the directory is not allowed to exceed
+	MaxCacheSize int64
 
 	Unlisted bool
 }
@@ -84,4 +88,5 @@ type Server struct {
 	ListenAddress string
 	TMDBScrapeKey string
 	Volumes       []Volume
+	Tokens        []string
 }

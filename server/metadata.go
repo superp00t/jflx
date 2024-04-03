@@ -83,7 +83,7 @@ func (s *Server) ScrapeMovieDir(path string, info fs.FileInfo) error {
 		}
 	}
 
-	movi, err := s.Scraper.AskMovie(q)
+	movi, err := s.scraper.AskMovie(q)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -157,11 +157,18 @@ func (s *Server) ScrapeMovieSource(source string) {
 	}
 }
 
-func (s *Server) PerformScrape() error {
+func (s *Server) perform_scrape() error {
+	if s.scrape_in_progress() {
+		return fmt.Errorf("already scraping")
+	}
+
+	s.scraper_status.Store(true)
+
 	var err error
-	s.Scraper, err = meta.NewTMDBScraper(s.Conf.TMDBScrapeKey, "")
+	s.scraper, err = meta.NewTMDBScraper(s.Conf.TMDBScrapeKey, "")
 	if err != nil {
-		s.Scraper = nil
+		s.scraper = nil
+		s.scraper_status.Store(false)
 		return err
 	}
 
@@ -173,20 +180,21 @@ func (s *Server) PerformScrape() error {
 		}
 	}
 
-	s.Scraper = nil
+	s.scraper = nil
+	s.scraper_status.Store(false)
 
 	return nil
 }
 
-func (s *Server) BeginScrape() {
-	log.Println(s.PerformScrape())
+func (s *Server) perform_scrape_and_log() {
+	err := s.perform_scrape()
+	if err == nil {
+		log.Println("scrape successful!")
+	} else {
+		log.Println("scrape failed:", err)
+	}
 }
 
-func (s *Server) Refresh(rw http.ResponseWriter, r *http.Request) {
-	if s.Scraper == nil {
-		fmt.Fprintf(rw, "starting")
-		go s.BeginScrape()
-	} else {
-		fmt.Fprintf(rw, "scrape in progress")
-	}
+func (s *Server) scrape_in_progress() bool {
+	return s.scraper_status.Load()
 }

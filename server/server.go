@@ -5,20 +5,23 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/superp00t/jflx/cache"
 	"github.com/superp00t/jflx/conf"
 	"github.com/superp00t/jflx/media"
 	"github.com/superp00t/jflx/meta"
 )
 
 type Server struct {
-	Conf      *conf.Server
-	Router    *mux.Router
-	WebServer *http.Server
-	Volumes   map[string]*Volume
-	Scraper   meta.Source
+	Conf           *conf.Server
+	Router         *mux.Router
+	WebServer      *http.Server
+	Volumes        map[string]*Volume
+	scraper        meta.Source
+	scraper_status atomic.Bool
 }
 
 func (s *Server) LoadVolumes() {
@@ -28,7 +31,20 @@ func (s *Server) LoadVolumes() {
 		cvol := &s.Conf.Volumes[i]
 		vol := new(Volume)
 		vol.Conf = cvol
-		vol.Handler = media.FileServer(vol)
+		if cvol.Cache != "" {
+			cache_server, err := cache.NewServer(&cache.Config{
+				Directory:       cvol.Cache,
+				MaxAge:          24 * time.Hour,
+				MaxDirectoryAge: 2 * time.Minute,
+				MaxSize:         cvol.MaxCacheSize,
+			}, vol)
+			if err != nil {
+				log.Fatal(err)
+			}
+			vol.Handler = media.FileServer(cache_server)
+		} else {
+			vol.Handler = media.FileServer(vol)
+		}
 
 		volumePrefix := fmt.Sprintf("/media/%s/", vol.Conf.Handle)
 
@@ -39,7 +55,7 @@ func (s *Server) LoadVolumes() {
 	}
 }
 
-func (s *Server) ListVolumes(rw http.ResponseWriter, r *http.Request) {
+func (s *Server) handle_get_list_volumes(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	if r.Method == "HEAD" {
@@ -71,16 +87,16 @@ func (s *Server) Init(cfg *conf.Server) error {
 	s.Conf = cfg
 	r := mux.NewRouter()
 	s.Router = r
-	r.HandleFunc("/refresh", s.Refresh)
-	r.HandleFunc("/media/", s.ListVolumes)
+	r.HandleFunc("POST /api/v1/refresh", s.handle_post_refresh)
+	r.HandleFunc("GET /media/", s.handle_get_list_volumes)
 
 	s.LoadVolumes()
 
 	s.WebServer = &http.Server{
 		Handler:      s,
 		Addr:         s.Conf.ListenAddress,
-		WriteTimeout: 15 * time.Minute,
-		ReadTimeout:  15 * time.Minute,
+		WriteTimeout: 5 * time.Hour,
+		ReadTimeout:  5 * time.Hour,
 	}
 	return nil
 }

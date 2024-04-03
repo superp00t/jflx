@@ -3,7 +3,6 @@ package server
 import (
 	"errors"
 	"io/fs"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -48,9 +47,14 @@ func (vd *volumeDir) Readdir(count int) ([]fs.FileInfo, error) {
 			dir = "."
 		}
 		fullName := filepath.Join(dir, filepath.FromSlash(path.Clean("/"+vd.dirname)))
-		dirents, err := ioutil.ReadDir(fullName)
+		dirents, err := os.ReadDir(fullName)
 		if err == nil {
-			ls = append(ls, dirents...)
+			for _, ent := range dirents {
+				info, err := ent.Info()
+				if err == nil {
+					ls = append(ls, info)
+				}
+			}
 		}
 	}
 
