@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	tmdb "github.com/cyruzin/golang-tmdb"
+	"github.com/superp00t/jflx/meta/nfo"
 )
 
 type TMDBScraper struct {
@@ -52,9 +53,11 @@ func (t *TMDBScraper) AskMovie(q *MovieQuestion) (*MovieAnswer, error) {
 	if err != nil {
 		return nil, err
 	}
-	ma.Uniqueid.Type = "tmdb"
-	ma.Uniqueid.Default = "true"
-	ma.Uniqueid.Text = strconv.FormatInt(int64(id), 10)
+	ma.Uniqueid = &nfo.ID{
+		Type:    "tmdb",
+		Default: "true",
+		Text:    strconv.FormatInt(int64(id), 10),
+	}
 	ma.Title = details.Title
 	ma.Originaltitle = details.OriginalTitle
 	ma.Plot = details.Overview
