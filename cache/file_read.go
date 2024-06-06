@@ -5,6 +5,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 )
@@ -47,12 +48,16 @@ func (file *cache_file) read_cache_part(index int64) (data []byte, err error) {
 			actual_checksum := sha512.Sum512(actual_data)
 			// return actual part data if checksum is valid
 			if bytes.Equal(checksum, actual_checksum[:]) {
+				// log.Println("Reading cached part", file.realpath, subfile_path)
 				return actual_data, nil
 			} else {
+				log.Println("Cached file was invalid", file.realpath, subfile_path)
 				// otherwise, remove the invalid part data
 				os.Remove(subfile_path)
 			}
 		}
+	} else {
+		log.Println("cached part does not exist for", file.realpath, subfile_path)
 	}
 
 	// if we can't get the part from the cache, read it from the source file and commit it to the cache.
@@ -99,6 +104,9 @@ func (file *cache_file) read_cache_part(index int64) (data []byte, err error) {
 		return
 	}
 	part_file.Close()
+
+	// Add byte usage
+	file.server.add_used_bytes(64 + int64(len(part_data)))
 
 	// Make cached file part available to user
 	if err = os.Rename(temp_path, subfile_path); err != nil {

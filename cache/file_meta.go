@@ -2,6 +2,7 @@ package cache
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"time"
 )
@@ -22,6 +23,8 @@ func (file *cache_file) read_meta_file() (err error) {
 		return
 	}
 
+	log.Println("read cached meta file for", file.realpath)
+
 	err = json.Unmarshal(meta_file, &file.meta)
 	return
 }
@@ -33,5 +36,6 @@ func (file *cache_file) write_meta_file() (err error) {
 	if err != nil {
 		return
 	}
+	file.server.add_used_bytes(int64(len(meta_file)))
 	return os.WriteFile(meta_file_path, meta_file, 0700)
 }
