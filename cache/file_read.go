@@ -57,7 +57,7 @@ func (file *cache_file) read_cache_part(index int64) (data []byte, err error) {
 			}
 		}
 	} else {
-		log.Println("cached part does not exist for", file.realpath, subfile_path)
+		// log.Println("cached part does not exist for", file.realpath, subfile_path)
 	}
 
 	// if we can't get the part from the cache, read it from the source file and commit it to the cache.

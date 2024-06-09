@@ -101,16 +101,42 @@ func (s *Server) free_oldest_files() (err error) {
 	return
 }
 
+func (s *Server) is_cache_locked() bool {
+	return s.cache_locked.Load()
+}
+
+func (s *Server) lock_cache() bool {
+	if !s.is_cache_locked() {
+		return false
+	}
+
+	success := s.guard_files.TryLock()
+	if success {
+		s.cache_locked.Store(true)
+	}
+
+	return success
+}
+
+func (s *Server) unlock_cache() {
+	s.guard_files.Unlock()
+	s.cache_locked.Store(false)
+}
+
 func (s *Server) attempt_free() (err error) {
+	if s.is_cache_locked() {
+		return nil
+	}
+
 	if time.Since(s.last_free_time) > free_time_interval && s.is_overweight() {
-		if !s.guard_files.TryLock() {
+		if !s.lock_cache() {
 			return
 		}
 
 		err = s.free_oldest_files()
 
 		s.last_free_time = time.Now()
-		s.guard_files.Unlock()
+		s.unlock_cache()
 	}
 
 	return

@@ -28,6 +28,7 @@ type Server struct {
 	config         *Config
 	source         http.FileSystem
 	used_bytes     atomic.Int64
+	cache_locked   atomic.Bool
 	last_free_time time.Time
 }
 

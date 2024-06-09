@@ -25,7 +25,7 @@ type Movie struct {
 	Actors        []Actor  `xml:"actor"`
 }
 
-func (m *Movie) Write(filename string) error {
+func WriteMovie(filename string, m *Movie) error {
 	b, err := xml.MarshalIndent(m, "", "\t")
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func (m *Movie) Write(filename string) error {
 	return os.WriteFile(filename, b, 0700)
 }
 
-func (m *Movie) Read(filename string) error {
+func ReadMovie(filename string, m *Movie) error {
 	b, err := os.ReadFile(filename)
 	if err != nil {
 		return err

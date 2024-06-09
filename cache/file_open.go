@@ -2,7 +2,6 @@ package cache
 
 import (
 	"io/fs"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -138,11 +137,22 @@ func (s *Server) open_cache_file(path string) (file *cache_file, err error) {
 }
 
 func (s *Server) Open(path string) (file http.File, err error) {
+	avoid_cache := false
+
+	if s.is_cache_locked() {
+		// cache is being freed.
+		avoid_cache = true
+	} else if s.is_overweight() {
+		avoid_cache = true
+		go s.attempt_free()
+	}
+
+	if avoid_cache {
+		return s.source.Open(path)
+	}
+
 	file, err = s.open_cache_file(path)
 	if err != nil {
-		log.Println("failed to open path", path, "err", err)
-		// fallback to source file
-		// return s.source.Open(path)
 		return nil, err
 	}
 
