@@ -55,7 +55,9 @@ func (t *TMDBScraper) AskTvshow(q *ShowQuestion) (tvshow *TvshowAnswer, err erro
 		return nil, nil
 	}
 
-	details, err := t.Client.GetTVDetails(id, nil)
+	details, err := t.Client.GetTVDetails(id, map[string]string{
+		// "append_to_response": "credits",
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +108,9 @@ func (t *TMDBScraper) AskTvshowEpisode(q *EpisodeQuestion) (episode *TvshowEpiso
 		return nil, err
 	}
 
-	details, err = t.Client.GetTVEpisodeDetails(q.ShowID, q.Season, q.Episode, nil)
+	details, err = t.Client.GetTVEpisodeDetails(q.ShowID, q.Season, q.Episode, map[string]string{
+		"append_to_response": "credits",
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -128,6 +132,13 @@ func (t *TMDBScraper) AskTvshowEpisode(q *EpisodeQuestion) (episode *TvshowEpiso
 		Type:    "tmdb",
 		Default: "true",
 		Text:    tmdb_id,
+	}
+
+	for _, credit := range details.Credits.Crew {
+		switch credit.Job {
+		case "Director":
+			episode.Directors = append(episode.Directors, credit.Name)
+		}
 	}
 
 	if details.StillPath != "" {

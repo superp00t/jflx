@@ -22,7 +22,7 @@ func (s *Server) scrape_movie_directory(path string, info fs.FileInfo) error {
 		return err
 	}
 
-	// Skip already scraped movies
+	// // Skip already scraped movies
 	if _, err := os.Stat(filepath.Join(path, "movie.nfo")); err == nil {
 		return nil
 	}

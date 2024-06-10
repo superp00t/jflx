@@ -37,7 +37,7 @@ type TvshowEpisode struct {
 	Uniqueid       *ID      `xml:"uniqueid"`
 	Genre          []string `xml:"genre"`
 	Credits        string   `xml:"credits"`
-	Director       string   `xml:"director"`
+	Directors      []string `xml:"director"`
 	Premiered      string   `xml:"premiered"`
 	Year           string   `xml:"year"`
 	Status         string   `xml:"status"`

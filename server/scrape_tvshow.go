@@ -102,9 +102,9 @@ func (s *Server) scrape_tvshow_directory(path string, name string) error {
 	}
 
 	// Skip already scraped tvshows
-	// if _, err := os.Stat(filepath.Join(path, "tvshow.nfo")); err == nil {
-	// 	return nil
-	// }
+	if _, err := os.Stat(filepath.Join(path, "tvshow.nfo")); err == nil {
+		return nil
+	}
 
 	// Read existing tvshow metadata
 	tvshow_meta, _ := jflxmeta.ReadTvshow(filepath.Join(path, "tvshow.jflxmeta"))

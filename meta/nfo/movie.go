@@ -19,7 +19,7 @@ type Movie struct {
 	Tag           string   `xml:"tag"`
 	Country       string   `xml:"country"`
 	Credits       string   `xml:"credits"`
-	Director      string   `xml:"director"`
+	Directors     []string `xml:"director"`
 	Premiered     string   `xml:"premiered"`
 	Studio        string   `xml:"studio"`
 	Actors        []Actor  `xml:"actor"`

@@ -39,15 +39,26 @@ func (t *TMDBScraper) AskMovie(q *ShowQuestion) (*MovieAnswer, error) {
 		return nil, nil
 	}
 
-	details, err := t.Client.GetMovieDetails(id, nil)
+	details, err := t.Client.GetMovieDetails(id, map[string]string{
+		"append_to_response": "credits",
+	})
 	if err != nil {
 		return nil, err
 	}
+
 	ma.Uniqueid = &nfo.ID{
 		Type:    "tmdb",
 		Default: "true",
 		Text:    strconv.FormatInt(int64(id), 10),
 	}
+
+	for _, credit := range details.Credits.Crew {
+		switch credit.Job {
+		case "Director":
+			ma.Directors = append(ma.Directors, credit.Name)
+		}
+	}
+
 	ma.Title = details.Title
 	ma.Originaltitle = details.OriginalTitle
 	ma.Plot = details.Overview
