@@ -62,10 +62,12 @@ func (t *TMDBScraper) AskTvshow(q *ShowQuestion) (tvshow *TvshowAnswer, err erro
 		return nil, err
 	}
 
-	tvshow.Uniqueid = &nfo.ID{
-		Type:    "tmdb",
-		Default: "true",
-		Text:    strconv.FormatInt(int64(id), 10),
+	tvshow.Uniqueids = []nfo.ID{
+		{
+			Type:    "tmdb",
+			Default: "true",
+			Text:    strconv.FormatInt(int64(id), 10),
+		},
 	}
 	tvshow.Title = details.Name
 	tvshow.Originaltitle = details.OriginalName
@@ -128,10 +130,12 @@ func (t *TMDBScraper) AskTvshowEpisode(q *EpisodeQuestion) (episode *TvshowEpiso
 	episode.ID = tmdb_id
 	episode.Season = strconv.FormatInt(int64(details.SeasonNumber), 10)
 	episode.Episode = strconv.FormatInt(int64(details.EpisodeNumber), 10)
-	episode.Uniqueid = &nfo.ID{
-		Type:    "tmdb",
-		Default: "true",
-		Text:    tmdb_id,
+	episode.Uniqueids = []nfo.ID{
+		{
+			Type:    "tmdb",
+			Default: "true",
+			Text:    tmdb_id,
+		},
 	}
 
 	for _, credit := range details.Credits.Crew {

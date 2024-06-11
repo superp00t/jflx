@@ -46,10 +46,12 @@ func (t *TMDBScraper) AskMovie(q *ShowQuestion) (*MovieAnswer, error) {
 		return nil, err
 	}
 
-	ma.Uniqueid = &nfo.ID{
-		Type:    "tmdb",
-		Default: "true",
-		Text:    strconv.FormatInt(int64(id), 10),
+	ma.Uniqueids = []nfo.ID{
+		{
+			Type:    "tmdb",
+			Default: "true",
+			Text:    strconv.FormatInt(int64(id), 10),
+		},
 	}
 
 	for _, credit := range details.Credits.Crew {

@@ -109,6 +109,24 @@ func (s *Server) scrape_tvshow_directory(path string, name string) error {
 	// Read existing tvshow metadata
 	tvshow_meta, _ := jflxmeta.ReadTvshow(filepath.Join(path, "tvshow.jflxmeta"))
 
+	//
+	nfo_path := filepath.Join(path, "tvshow.nfo")
+
+	// Skip if NFO has same ID as meta file
+	if _, err := os.Stat(nfo_path); err == nil {
+		var nfo_data nfo.Tvshow
+		err := nfo.ReadTvshow(nfo_path, &nfo_data)
+		if err != nil {
+			return err
+		}
+
+		if tvshow_meta != nil {
+			if nfo.GetDefault(nfo_data.Uniqueids).Text == strconv.FormatInt(tvshow_meta.ForceTvshowID, 10) {
+				return nil
+			}
+		}
+	}
+
 	q := &meta.ShowQuestion{
 		Name: matches[1],
 		Year: int(i),
@@ -138,15 +156,12 @@ func (s *Server) scrape_tvshow_directory(path string, name string) error {
 		return nil
 	}
 
-	show_id, err = strconv.Atoi(show.Tvshow.Uniqueid.Text)
+	show_id, err = strconv.Atoi(nfo.GetDefault(show.Tvshow.Uniqueids).Text)
 	if err != nil {
 		panic(err)
 	}
 
-	nfoPath := filepath.Join(path, "tvshow.nfo")
-	log.Println("writing to", nfoPath)
-
-	if err := nfo.WriteTvshow(nfoPath, &show.Tvshow); err != nil {
+	if err := nfo.WriteTvshow(nfo_path, &show.Tvshow); err != nil {
 		return err
 	}
 

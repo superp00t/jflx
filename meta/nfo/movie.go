@@ -13,7 +13,7 @@ type Movie struct {
 	Userrating    string   `xml:"userrating"`
 	Plot          string   `xml:"plot"`
 	Mpaa          string   `xml:"mpaa"`
-	Uniqueid      *ID      `xml:"uniqueid"`
+	Uniqueids     []ID     `xml:"uniqueid"`
 	Genre         string   `xml:"genre"`
 	Tagline       string   `xml:"tagline"`
 	Tag           string   `xml:"tag"`

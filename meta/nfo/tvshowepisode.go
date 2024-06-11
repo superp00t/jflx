@@ -34,7 +34,7 @@ type TvshowEpisode struct {
 	Playcount      string   `xml:"playcount"`
 	Lastplayed     string   `xml:"lastplayed"`
 	ID             string   `xml:"id"`
-	Uniqueid       *ID      `xml:"uniqueid"`
+	Uniqueids      []ID     `xml:"uniqueid"`
 	Genre          []string `xml:"genre"`
 	Credits        string   `xml:"credits"`
 	Directors      []string `xml:"director"`

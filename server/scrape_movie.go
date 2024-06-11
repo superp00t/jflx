@@ -22,13 +22,27 @@ func (s *Server) scrape_movie_directory(path string, info fs.FileInfo) error {
 		return err
 	}
 
-	// // Skip already scraped movies
-	if _, err := os.Stat(filepath.Join(path, "movie.nfo")); err == nil {
-		return nil
-	}
-
 	// Read existing movie metadata
 	movie_meta, _ := jflxmeta.ReadMovie(filepath.Join(path, "movie.jflxmeta"))
+
+	//
+	nfo_path := filepath.Join(path, "movie.nfo")
+
+	// Skip if NFO has same ID as meta file
+	if _, err := os.Stat(nfo_path); err == nil {
+		var nfo_data nfo.Movie
+		err := nfo.ReadMovie(nfo_path, &nfo_data)
+		if err != nil {
+			return err
+		}
+
+		if movie_meta != nil {
+			if nfo.GetDefault(nfo_data.Uniqueids).Text == strconv.FormatInt(movie_meta.ForceMovieID, 10) {
+				return nil
+			}
+		}
+
+	}
 
 	q := &meta.ShowQuestion{
 		Name: matches[1],
@@ -59,10 +73,7 @@ func (s *Server) scrape_movie_directory(path string, info fs.FileInfo) error {
 
 	log.Println(info.Name())
 
-	nfoPath := filepath.Join(path, "movie.nfo")
-	log.Println("writing to", nfoPath)
-
-	if err := nfo.WriteMovie(nfoPath, &movi.Movie); err != nil {
+	if err := nfo.WriteMovie(nfo_path, &movi.Movie); err != nil {
 		return err
 	}
 

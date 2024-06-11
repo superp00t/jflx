@@ -27,7 +27,7 @@ type Tvshow struct {
 	Tagline        string        `xml:"tagline"`
 	Runtime        string        `xml:"runtime"`
 	Mpaa           string        `xml:"mpaa"`
-	Uniqueid       *ID           `xml:"uniqueid"`
+	Uniqueids      []ID          `xml:"uniqueid"`
 	Genre          string        `xml:"genre"`
 	Premiered      string        `xml:"premiered"`
 	Year           string        `xml:"year"`
