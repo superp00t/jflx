@@ -28,20 +28,32 @@ func (s *Server) scrape_movie_directory(path string, info fs.FileInfo) error {
 	//
 	nfo_path := filepath.Join(path, "movie.nfo")
 
+	id_changed := false
+
 	// Skip if NFO has same ID as meta file
 	if _, err := os.Stat(nfo_path); err == nil {
+		// If NFO file exists
 		var nfo_data nfo.Movie
 		err := nfo.ReadMovie(nfo_path, &nfo_data)
-		if err != nil {
-			return err
-		}
+		if err == nil {
+			// If NFO file has an ID
+			default_id := nfo.GetDefault(nfo_data.Uniqueids)
 
-		if movie_meta != nil {
-			if nfo.GetDefault(nfo_data.Uniqueids).Text == strconv.FormatInt(movie_meta.ForceMovieID, 10) {
-				return nil
+			if default_id != nil {
+				// If movie has a JFLXMETA file
+				if movie_meta != nil {
+					// if movie has the same ID as the forced one, nothing to do
+					if default_id.Text == strconv.FormatInt(movie_meta.ForceMovieID, 10) {
+						return nil
+					}
+					id_changed = true
+					// otherwise, refresh
+				} else {
+					// if not, skip. (we already have NFO)
+					return nil
+				}
 			}
 		}
-
 	}
 
 	q := &meta.ShowQuestion{
@@ -77,7 +89,12 @@ func (s *Server) scrape_movie_directory(path string, info fs.FileInfo) error {
 		return err
 	}
 
-	os.Remove(filepath.Join(path, "banner.jpg"))
+	if id_changed {
+		os.Remove(filepath.Join(path, "banner.jpg"))
+		os.Remove(filepath.Join(path, "poster.jpg"))
+		os.Remove(filepath.Join(path, "landscape.jpg"))
+		os.Remove(filepath.Join(path, "clearlogo.jpg"))
+	}
 
 	if movi.PosterURL != "" {
 		if err := s.update_jpeg_file(poster_artwork, movi.PosterURL, filepath.Join(path, "poster.jpg")); err != nil {

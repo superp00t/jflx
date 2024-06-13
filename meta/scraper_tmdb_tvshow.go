@@ -138,10 +138,12 @@ func (t *TMDBScraper) AskTvshowEpisode(q *EpisodeQuestion) (episode *TvshowEpiso
 		},
 	}
 
-	for _, credit := range details.Credits.Crew {
-		switch credit.Job {
-		case "Director":
-			episode.Directors = append(episode.Directors, credit.Name)
+	if details.Credits != nil {
+		for _, credit := range details.Credits.Crew {
+			switch credit.Job {
+			case "Director":
+				episode.Directors = append(episode.Directors, credit.Name)
+			}
 		}
 	}
 
