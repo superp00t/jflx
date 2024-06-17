@@ -23,13 +23,18 @@ func (s *Server) scrape_tvshow_season_episode(tvshow_ID int, season int, season_
 	episode_filename_without_extension := episode_filename[0 : len(episode_filename)-len(extension)]
 
 	nfo_path := filepath.Join(season_directory, episode_filename_without_extension+".nfo")
-	log.Println("writing to", nfo_path)
+
+	// Skip if NFO already exists
+	if _, err := os.Stat(nfo_path); err == nil {
+		return nil
+	}
 
 	episode, err := s.scraper.AskTvshowEpisode(&q)
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
+	log.Println("writing to", nfo_path)
 	if err := nfo.WriteTvshowEpisode(nfo_path, &episode.TvshowEpisode); err != nil {
 		return err
 	}
@@ -106,6 +111,7 @@ func (s *Server) scrape_tvshow_directory(path string, name string) error {
 
 	//
 	nfo_path := filepath.Join(path, "tvshow.nfo")
+	id_changed := false
 
 	// Skip if NFO has same ID as meta file
 	if _, err := os.Stat(nfo_path); err == nil {
@@ -116,8 +122,8 @@ func (s *Server) scrape_tvshow_directory(path string, name string) error {
 		}
 
 		if tvshow_meta != nil {
-			if nfo.GetDefault(nfo_data.Uniqueids).Text == strconv.FormatInt(tvshow_meta.ForceTvshowID, 10) {
-				return nil
+			if nfo.GetDefault(nfo_data.Uniqueids).Text != strconv.FormatInt(tvshow_meta.ForceTvshowID, 10) {
+				id_changed = true
 			}
 		}
 	}
@@ -160,7 +166,9 @@ func (s *Server) scrape_tvshow_directory(path string, name string) error {
 		return err
 	}
 
-	os.Remove(filepath.Join(path, "banner.jpg"))
+	if id_changed {
+		os.Remove(filepath.Join(path, "banner.jpg"))
+	}
 
 	if show.PosterURL != "" {
 		if err := s.update_jpeg_file(poster_artwork, show.PosterURL, filepath.Join(path, "poster.jpg")); err != nil {

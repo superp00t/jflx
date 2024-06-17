@@ -77,7 +77,7 @@ func (s *Server) handle_get_list_volumes(rw http.ResponseWriter, r *http.Request
 }
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	log.Println(r.RemoteAddr, r.Method, r.URL.Path)
+	log.Println(fmt.Sprintf("HTTP/%d.%d", r.ProtoMajor, r.ProtoMinor), r.RemoteAddr, r.Method, r.URL.Path)
 	s.Router.ServeHTTP(rw, r)
 }
 
