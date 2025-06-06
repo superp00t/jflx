@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type MediaKinds uint16
@@ -74,14 +75,29 @@ type Volume struct {
 	Kinds MediaKinds
 	// Handle: determines what the URL prefix will be i.e. (/media/{Handle}/movie.mp4)
 	Handle string
-	// Sources: the
+	// Sources: lists directories the volume pulls files from. In effect, the volume is a union filesystem.
 	Sources []string
 	// Cache: The directory to store a cache.
 	Cache string
 	// MaxCacheSize: the amount of bytes the directory is not allowed to exceed
 	MaxCacheSize int64
-
+	// Does not appear in the index
 	Unlisted bool
+	// If not empty, user must be a member of this group to access this volume
+	UserGroup string
+}
+
+type LDAP struct {
+	// "dn=example,dn=com"
+	BaseDN string
+	// LDAP server
+	URL string
+	// LDAP admin username
+	Username string
+	// LDAP admin password
+	Password string
+	// how long credentials stay cached in memory
+	CacheExpiry time.Duration
 }
 
 type Server struct {
@@ -89,4 +105,6 @@ type Server struct {
 	TMDBScrapeKey string
 	Volumes       []Volume
 	Tokens        []string
+	AuthProvider  string
+	LDAP          LDAP
 }

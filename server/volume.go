@@ -15,8 +15,8 @@ import (
 )
 
 type Volume struct {
-	Conf    *conf.Volume
-	Handler http.Handler
+	config  conf.Volume
+	handler http.Handler
 }
 
 type volumeDir struct {
@@ -41,7 +41,7 @@ func (vd *volumeDir) Readdir(count int) ([]fs.FileInfo, error) {
 
 	var ls []fs.FileInfo
 
-	for _, d := range vd.v.Conf.Sources {
+	for _, d := range vd.v.config.Sources {
 		dir := string(d)
 		if dir == "" {
 			dir = "."
@@ -70,7 +70,7 @@ func (vd *volumeDir) Readdir(count int) ([]fs.FileInfo, error) {
 }
 
 func (vd *volumeDir) Stat() (fs.FileInfo, error) {
-	for _, d := range vd.v.Conf.Sources {
+	for _, d := range vd.v.config.Sources {
 		dir := string(d)
 		if dir == "" {
 			dir = "."
@@ -102,7 +102,7 @@ func (v *Volume) Open(name string) (http.File, error) {
 		return nil, errors.New("JFLX/server: invalid character in file path")
 	}
 
-	for _, d := range v.Conf.Sources {
+	for _, d := range v.config.Sources {
 		dir := string(d)
 		if dir == "" {
 			dir = "."

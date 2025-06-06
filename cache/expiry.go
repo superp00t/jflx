@@ -60,7 +60,6 @@ func (s *Server) free_oldest_files() (err error) {
 
 	if err = filepath.Walk(s.config.Directory, func(path string, info fs.FileInfo, err error) error {
 		if err == nil {
-			fmt.Println("attempting free", path)
 			if strings.HasSuffix(path, ".lat") {
 				if len(path) >= (4 + 64) {
 					var age cache_age
@@ -106,7 +105,7 @@ func (s *Server) is_cache_locked() bool {
 }
 
 func (s *Server) lock_cache() bool {
-	if !s.is_cache_locked() {
+	if s.is_cache_locked() {
 		return false
 	}
 
@@ -128,15 +127,20 @@ func (s *Server) attempt_free() (err error) {
 		return nil
 	}
 
-	if time.Since(s.last_free_time) > free_time_interval && s.is_overweight() {
-		if !s.lock_cache() {
-			return
+	if time.Since(s.last_free_time) > free_time_interval {
+		if s.is_overweight() {
+			if !s.lock_cache() {
+				log.Println("Failed to get cache lock")
+				return
+			}
+
+			log.Println("Got cache lock!")
+
+			err = s.free_oldest_files()
+
+			s.last_free_time = time.Now()
+			s.unlock_cache()
 		}
-
-		err = s.free_oldest_files()
-
-		s.last_free_time = time.Now()
-		s.unlock_cache()
 	}
 
 	return
@@ -169,6 +173,14 @@ func (s *Server) add_used_bytes(delta int64) {
 
 func (s *Server) is_overweight() bool {
 	return s.used_bytes.Load() > s.config.MaxSize
+}
+
+func (s *Server) bytes_overweight() int64 {
+	ub := s.used_bytes.Load()
+	if ub < s.config.MaxSize {
+		return 0
+	}
+	return s.config.MaxSize - ub
 }
 
 func (s *Server) weight() float32 {

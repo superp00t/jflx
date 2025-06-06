@@ -198,7 +198,6 @@ func (s *Server) scrape_tvshow_directory(path string, name string) error {
 		if ent.IsDir() {
 			// Is this a valid season name? 00-99
 			if season_folder_regex.MatchString(ent.Name()) {
-
 				season, err := strconv.ParseInt(ent.Name(), 10, 64)
 				if err == nil {
 					if err = s.scrape_tvshow_season_directory(show_id, int(season), filepath.Join(path, ent.Name())); err != nil {
@@ -226,7 +225,7 @@ func (s *Server) scrape_tvshow_source(source string) {
 			if name_and_year_regex.MatchString(info.Name()) {
 				if err := s.scrape_tvshow_directory(filepath.Join(source, info.Name()), info.Name()); err != nil {
 					log.Println("scrape_tvshow_directory: ", err)
-					return
+					continue
 				}
 			}
 		}

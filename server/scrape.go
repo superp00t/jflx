@@ -66,7 +66,7 @@ func (s *Server) perform_scrape() error {
 	s.scraper_status.Store(true)
 
 	var err error
-	s.scraper, err = meta.NewTMDBScraper(s.Conf.TMDBScrapeKey, "")
+	s.scraper, err = meta.NewTMDBScraper(s.config.TMDBScrapeKey, "")
 	if err != nil {
 		s.scraper = nil
 		s.scraper_status.Store(false)
@@ -74,17 +74,17 @@ func (s *Server) perform_scrape() error {
 	}
 
 	// Scrape movie sources
-	for _, vol := range s.Volumes {
-		if vol.Conf.Kinds == conf.Movie {
-			for _, src := range vol.Conf.Sources {
+	for _, volume_config := range s.config.Volumes {
+		if volume_config.Kinds == conf.Movie {
+			for _, src := range volume_config.Sources {
 				s.scrape_movie_source(src)
 			}
 		}
 	}
 
-	for _, vol := range s.Volumes {
-		if vol.Conf.Kinds == conf.TvShow {
-			for _, src := range vol.Conf.Sources {
+	for _, volume_config := range s.config.Volumes {
+		if volume_config.Kinds == conf.TvShow {
+			for _, src := range volume_config.Sources {
 				s.scrape_tvshow_source(src)
 			}
 		}

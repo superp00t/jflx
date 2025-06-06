@@ -2,14 +2,16 @@ package conf
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 )
 
-func LoadServer(path string) (*Server, error) {
-	b, err := ioutil.ReadFile(path)
+func LoadServer(name string, c *Server) (err error) {
+	var b []byte
+	b, err = os.ReadFile(name)
 	if err != nil {
-		return nil, err
+		return
 	}
-	s := new(Server)
-	return s, json.Unmarshal(b, s)
+
+	err = json.Unmarshal(b, c)
+	return
 }

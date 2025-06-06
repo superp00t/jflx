@@ -1,4 +1,4 @@
-# josh flicks
+# jflx
 
 An example server.conf:
 
@@ -28,7 +28,7 @@ An example server.conf:
 
 # download code
 git clone https://github.com/superp00t/jflx.git
-# go into josh flicks directory
+# go into jflx directory
 cd jflx
 # now you should create your server.conf in this directory
 

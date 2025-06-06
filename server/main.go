@@ -8,26 +8,19 @@ import (
 	"github.com/superp00t/jflx/conf"
 )
 
-func exeDir() string {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	exPath := filepath.Dir(ex)
-	return exPath
-}
-
 func Main() {
-	configLocation := filepath.Join(exeDir(), "server.conf")
+	wd, _ := os.Getwd()
 
-	cfg, err := conf.LoadServer(configLocation)
+	configLocation := filepath.Join(wd, "server.conf")
+
+	s := new(Server)
+	err := conf.LoadServer(configLocation, &s.config)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	s := new(Server)
-	if err := s.Init(cfg); err != nil {
+	if err := s.init(); err != nil {
 		log.Fatal(err)
 		return
 	}

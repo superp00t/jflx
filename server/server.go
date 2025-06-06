@@ -10,47 +10,66 @@ import (
 
 	"github.com/superp00t/jflx/cache"
 	"github.com/superp00t/jflx/conf"
-	"github.com/superp00t/jflx/media"
+	"github.com/superp00t/jflx/media/httpdirectory"
 	"github.com/superp00t/jflx/meta"
 )
 
 type Server struct {
-	Conf           *conf.Server
-	Router         *http.ServeMux
-	WebServer      *http.Server
-	Volumes        map[string]*Volume
-	scraper        meta.Source
+	// the configuration
+	config conf.Server
+	// http path router
+	serve_mux *http.ServeMux
+	server    *http.Server
+	scraper   meta.Source
+	// signals whether scraper is active
 	scraper_status atomic.Bool
+	// volumes
+	volumes map[string]*Volume
+	// auth
+	auth auth_provider
 }
 
-func (s *Server) LoadVolumes() {
-	s.Volumes = make(map[string]*Volume)
+func (s *Server) init_volumes() {
+	s.volumes = make(map[string]*Volume)
 
-	for i := range s.Conf.Volumes {
-		cvol := &s.Conf.Volumes[i]
-		vol := new(Volume)
-		vol.Conf = cvol
-		if cvol.Cache != "" {
+	for i := range s.config.Volumes {
+		volume := new(Volume)
+		volume.config = s.config.Volumes[i]
+		if volume.config.Cache != "" {
 			cache_server, err := cache.NewServer(&cache.Config{
-				Directory:       cvol.Cache,
+				Directory:       volume.config.Cache,
 				MaxAge:          24 * time.Hour,
 				MaxDirectoryAge: 2 * time.Minute,
-				MaxSize:         cvol.MaxCacheSize,
-			}, vol)
+				MaxSize:         volume.config.MaxCacheSize,
+			}, volume)
 			if err != nil {
 				log.Fatal(err)
 			}
-			vol.Handler = media.FileServer(cache_server)
+			volume.handler = httpdirectory.FileServer(cache_server)
 		} else {
-			vol.Handler = media.FileServer(vol)
+			volume.handler = httpdirectory.FileServer(volume)
 		}
 
-		volumePrefix := fmt.Sprintf("/media/%s/", vol.Conf.Handle)
-
-		s.Router.Handle(volumePrefix, http.StripPrefix(volumePrefix, vol.Handler))
-
-		s.Volumes[vol.Conf.Handle] = vol
+		s.volumes[volume.config.Handle] = volume
 	}
+}
+
+func (s *Server) handle_volume(rw http.ResponseWriter, r *http.Request) {
+	volume_handle := r.PathValue("volume")
+
+	volume, found := s.volumes[volume_handle]
+	if !found {
+		http.Error(rw, "not found", http.StatusNotFound)
+		return
+	}
+
+	if volume.config.UserGroup != "" {
+		if !s.authorize_request(volume.config.UserGroup, rw, r) {
+			return
+		}
+	}
+
+	http.StripPrefix("/media/"+volume_handle, volume.handler).ServeHTTP(rw, r)
 }
 
 func (s *Server) handle_get_list_volumes(rw http.ResponseWriter, r *http.Request) {
@@ -61,43 +80,55 @@ func (s *Server) handle_get_list_volumes(rw http.ResponseWriter, r *http.Request
 	}
 
 	var ks []string
-	for k := range s.Volumes {
-		ks = append(ks, k)
+	for _, v := range s.config.Volumes {
+		if !v.Unlisted {
+			ks = append(ks, v.Handle)
+		}
 	}
 	sort.Strings(ks)
 
 	fmt.Fprintf(rw, "<h1 style=\"font-family: Arial;\">All JFLX Volumes</h1><pre>\n")
 	for _, k := range ks {
-		vol := s.Volumes[k]
-		if !vol.Conf.Unlisted {
-			fmt.Fprintf(rw, "<a href=\"%s/\">%s (%s)</a>\n", vol.Conf.Handle, vol.Conf.Handle, vol.Conf.Kinds.String())
+		volume := s.volumes[k]
+		if !volume.config.Unlisted {
+			fmt.Fprintf(rw, "<a href=\"%s/\">%s (%s)</a>\n", volume.config.Handle, volume.config.Handle, volume.config.Kinds.String())
 		}
 	}
 	fmt.Fprintf(rw, "</pre>")
 }
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	log.Println(fmt.Sprintf("HTTP/%d.%d", r.ProtoMajor, r.ProtoMinor), r.RemoteAddr, r.Method, r.URL.Path)
-	s.Router.ServeHTTP(rw, r)
+	log.Println(r.Header.Get("Referer"), fmt.Sprintf("HTTP/%d.%d", r.ProtoMajor, r.ProtoMinor), r.RemoteAddr, r.Method, r.URL.Path)
+	s.serve_mux.ServeHTTP(rw, r)
 }
 
-func (s *Server) Init(cfg *conf.Server) error {
-	s.Conf = cfg
-	s.Router = http.NewServeMux()
-	s.Router.HandleFunc("POST /api/v1/refresh", s.handle_post_refresh)
-	s.Router.HandleFunc("/media/", s.handle_get_list_volumes)
+func (s *Server) init() (err error) {
+	switch s.config.AuthProvider {
+	case "ldap":
+		s.auth = new_ldap_cached_auth_provider(s)
+	case "":
+	default:
+		err = fmt.Errorf("unknown auth provider: %s", s.config.AuthProvider)
+		return
+	}
 
-	s.LoadVolumes()
+	s.init_volumes()
 
-	s.WebServer = &http.Server{
+	s.serve_mux = http.NewServeMux()
+	s.serve_mux.HandleFunc("POST /api/v1/refresh", s.handle_post_refresh)
+	s.serve_mux.HandleFunc("/media/", s.handle_get_list_volumes)
+	s.serve_mux.HandleFunc("/media/{volume}/", s.handle_volume)
+
+	s.server = &http.Server{
 		Handler:      s,
-		Addr:         s.Conf.ListenAddress,
+		Addr:         s.config.ListenAddress,
 		WriteTimeout: 5 * time.Hour,
 		ReadTimeout:  5 * time.Hour,
 	}
-	return nil
+
+	return
 }
 
 func (s *Server) Serve() error {
-	return s.WebServer.ListenAndServe()
+	return s.server.ListenAndServe()
 }

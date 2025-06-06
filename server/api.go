@@ -7,7 +7,7 @@ import (
 
 func (s *Server) check_authorization(rw http.ResponseWriter, r *http.Request) (err error) {
 	user_token := r.Header.Get("X-JFLX-Token")
-	for _, token := range s.Conf.Tokens {
+	for _, token := range s.config.Tokens {
 		if token == user_token {
 			return
 		}
