@@ -7,5 +7,6 @@ COPY ./ /build
 RUN go build -v -o /build/jflx_server  github.com/superp00t/jflx/cmd/jflx_server
 
 FROM alpine
+WORKDIR /jflx
 COPY --from=0 /build/jflx_server /bin/jflx_server
 CMD ["/bin/jflx_server"]
