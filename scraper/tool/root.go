@@ -12,4 +12,6 @@ func Run() {
 
 func init() {
 	Root.AddCommand(&ScrapeLibrary)
+	Root.AddCommand(&ScrapeTVShow)
+	Root.AddCommand(&ScrapeMovie)
 }

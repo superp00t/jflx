@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -135,4 +136,29 @@ func (s *Scraper) scrape_movie_source(source string) {
 	}); err != nil {
 		log.Println("ScrapeMovieSource: ", err)
 	}
+}
+
+type ScrapeMovieParams struct {
+	TMDB_API_Key string
+	MovieName    string
+}
+
+func ScrapeMovie(params *ScrapeMovieParams) (err error) {
+	var fi os.FileInfo
+	fi, err = os.Stat(params.MovieName)
+	if err != nil {
+		return
+	}
+	if !fi.IsDir() {
+		err = fmt.Errorf("movie %s is not a directory", params.MovieName)
+		return
+	}
+
+	var s Scraper
+	s.meta_db, err = meta.NewDatabaseTMDB(params.TMDB_API_Key, "")
+	if err != nil {
+		return
+	}
+	err = s.scrape_movie_directory(params.MovieName, fi)
+	return
 }

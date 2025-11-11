@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -230,4 +231,29 @@ func (s *Scraper) scrape_tvshow_source(source string) {
 			}
 		}
 	}
+}
+
+type ScrapeTVShowParams struct {
+	TMDB_API_Key string
+	TVShowName   string
+}
+
+func ScrapeTVShow(params *ScrapeTVShowParams) (err error) {
+	var fi os.FileInfo
+	fi, err = os.Stat(params.TVShowName)
+	if err != nil {
+		return
+	}
+	if !fi.IsDir() {
+		err = fmt.Errorf("tv show %s is not a directory", params.TVShowName)
+		return
+	}
+
+	var s Scraper
+	s.meta_db, err = meta.NewDatabaseTMDB(params.TMDB_API_Key, "")
+	if err != nil {
+		return
+	}
+	err = s.scrape_tvshow_directory(params.TVShowName, filepath.Base(params.TVShowName))
+	return
 }
