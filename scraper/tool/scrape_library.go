@@ -42,6 +42,7 @@ func run_scrape_library(c *cobra.Command, args []string) {
 
 	sp.Volumes = server_config.Volumes
 	if err = scraper.ScrapeLibrary(&sp); err != nil {
+		log.Fatal(err)
 		return
 	}
 }
