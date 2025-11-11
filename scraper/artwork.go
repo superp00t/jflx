@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/jpeg"
 	"net/http"
@@ -46,6 +47,9 @@ func (s *Scraper) update_jpeg_file(art art_type, image_url string, image_file st
 			image_file,
 			img,
 			0700)
+		if err == nil {
+			fmt.Println("download", image_file)
+		}
 	}
 
 	return

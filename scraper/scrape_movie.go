@@ -3,7 +3,6 @@ package scraper
 import (
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -50,6 +49,7 @@ func (s *Scraper) scrape_movie_directory(path string, info fs.FileInfo) error {
 					id_changed = true
 					// otherwise, refresh
 				} else {
+					fmt.Println("skipping", info.Name())
 					// if not, skip. (we already have NFO)
 					return nil
 				}
@@ -76,7 +76,7 @@ func (s *Scraper) scrape_movie_directory(path string, info fs.FileInfo) error {
 
 	movi, err := s.meta_db.AskMovie(q)
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		return err
 	}
 
@@ -84,17 +84,19 @@ func (s *Scraper) scrape_movie_directory(path string, info fs.FileInfo) error {
 		return nil
 	}
 
-	log.Println(info.Name())
+	fmt.Println(info.Name())
 
 	if err := nfo.WriteMovie(nfo_path, &movi.Movie); err != nil {
 		return err
 	}
+	fmt.Println(info.Name(), "changed, updated movie.nfo")
 
 	if id_changed {
 		os.Remove(filepath.Join(path, "banner.jpg"))
 		os.Remove(filepath.Join(path, "poster.jpg"))
 		os.Remove(filepath.Join(path, "landscape.jpg"))
 		os.Remove(filepath.Join(path, "clearlogo.jpg"))
+		fmt.Println(info.Name(), "id changed, removing old images")
 	}
 
 	if movi.PosterURL != "" {
@@ -119,8 +121,6 @@ func (s *Scraper) scrape_movie_directory(path string, info fs.FileInfo) error {
 }
 
 func (s *Scraper) scrape_movie_source(source string) {
-	log.Println("Scraping source", source)
-
 	if err := filepath.Walk(source, func(path string, info fs.FileInfo, err error) error {
 		if info == nil {
 			return nil
@@ -134,7 +134,7 @@ func (s *Scraper) scrape_movie_source(source string) {
 		}
 		return nil
 	}); err != nil {
-		log.Println("ScrapeMovieSource: ", err)
+		fmt.Println("ScrapeMovieSource: ", err)
 	}
 }
 

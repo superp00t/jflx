@@ -1,7 +1,7 @@
 package tool
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/superp00t/jflx/config"
@@ -25,24 +25,24 @@ func run_scrape_library(c *cobra.Command, args []string) {
 	var err error
 	sp.TMDB_API_Key, err = f.GetString("tmdb-api-key")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 	var config_location string
 	config_location, err = f.GetString("config")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 	var server_config config.ServerConfig
 	if err = server_config.Load(config_location); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 
 	sp.Volumes = server_config.Volumes
 	if err = scraper.ScrapeLibrary(&sp); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 }

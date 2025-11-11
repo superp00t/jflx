@@ -2,7 +2,6 @@ package scraper
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -32,10 +31,10 @@ func (s *Scraper) scrape_tvshow_season_episode(tvshow_ID int, season int, season
 
 	episode, err := s.meta_db.AskTvshowEpisode(&q)
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		return nil
 	}
-	log.Println("writing to", nfo_path)
+	fmt.Println("writing to", nfo_path)
 	if err := nfo.WriteTvshowEpisode(nfo_path, &episode.TvshowEpisode); err != nil {
 		return err
 	}
@@ -82,7 +81,7 @@ func (s *Scraper) scrape_tvshow_season_directory(tvshow_ID int, season int, path
 
 				episode_number, err := strconv.ParseInt(matches[2], 10, 64)
 				if err != nil {
-					log.Println("matches are", spew.Sdump(matches))
+					fmt.Println("matches are", spew.Sdump(matches))
 					return err
 				}
 
@@ -150,7 +149,7 @@ func (s *Scraper) scrape_tvshow_directory(path string, name string) error {
 
 	show, err := s.meta_db.AskTvshow(q)
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		return err
 	}
 
@@ -213,11 +212,11 @@ func (s *Scraper) scrape_tvshow_directory(path string, name string) error {
 }
 
 func (s *Scraper) scrape_tvshow_source(source string) {
-	log.Println("Scraping source", source)
+	fmt.Println("Scraping source", source)
 
 	source_list, err := os.ReadDir(source)
 	if err != nil {
-		log.Println("scrape_tvshow_source: ReadDir(): ", err)
+		fmt.Println("scrape_tvshow_source: ReadDir(): ", err)
 		return
 	}
 
@@ -225,7 +224,7 @@ func (s *Scraper) scrape_tvshow_source(source string) {
 		if info.IsDir() {
 			if name_and_year_regex.MatchString(info.Name()) {
 				if err := s.scrape_tvshow_directory(filepath.Join(source, info.Name()), info.Name()); err != nil {
-					log.Println("scrape_tvshow_directory: ", err)
+					fmt.Println("scrape_tvshow_directory: ", err)
 					continue
 				}
 			}
