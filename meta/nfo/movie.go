@@ -30,7 +30,7 @@ func WriteMovie(filename string, m *Movie) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filename, b, 0700)
+	return os.WriteFile(filename, b, 0755)
 }
 
 func ReadMovie(filename string, m *Movie) error {

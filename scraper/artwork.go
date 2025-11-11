@@ -46,7 +46,7 @@ func (s *Scraper) update_jpeg_file(art art_type, image_url string, image_file st
 		err = os.WriteFile(
 			image_file,
 			img,
-			0700)
+			0755)
 		if err == nil {
 			fmt.Println("download", image_file)
 		}

@@ -54,7 +54,7 @@ func WriteTvshowEpisode(filename string, m *TvshowEpisode) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filename, b, 0700)
+	return os.WriteFile(filename, b, 0755)
 }
 
 func ReadTvshowEpisode(filename string, m *TvshowEpisode) error {
