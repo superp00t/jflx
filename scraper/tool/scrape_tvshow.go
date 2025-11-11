@@ -26,7 +26,7 @@ func run_scrape_tvshow(c *cobra.Command, args []string) {
 		log.Fatal(err)
 		return
 	}
-	p.TVShowName = args[1]
+	p.TVShowName = args[0]
 	if err = scraper.ScrapeTVShow(&p); err != nil {
 		log.Fatal(err)
 		return

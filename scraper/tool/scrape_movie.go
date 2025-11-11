@@ -26,7 +26,7 @@ func run_scrape_movie(c *cobra.Command, args []string) {
 		log.Fatal(err)
 		return
 	}
-	sp.MovieName = args[1]
+	sp.MovieName = args[0]
 	if err = scraper.ScrapeMovie(&sp); err != nil {
 		log.Fatal(err)
 		return
