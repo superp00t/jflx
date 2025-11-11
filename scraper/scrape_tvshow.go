@@ -1,4 +1,4 @@
-package server
+package scraper
 
 import (
 	"log"
@@ -12,7 +12,7 @@ import (
 	"github.com/superp00t/jflx/meta/nfo"
 )
 
-func (s *Server) scrape_tvshow_season_episode(tvshow_ID int, season int, season_directory string, episode_number_in_season int, episode_filename string, episode_title string) error {
+func (s *Scraper) scrape_tvshow_season_episode(tvshow_ID int, season int, season_directory string, episode_number_in_season int, episode_filename string, episode_title string) error {
 	var q meta.EpisodeQuestion
 	q.Episode = episode_number_in_season
 	q.Season = season
@@ -29,7 +29,7 @@ func (s *Server) scrape_tvshow_season_episode(tvshow_ID int, season int, season_
 		return nil
 	}
 
-	episode, err := s.scraper.AskTvshowEpisode(&q)
+	episode, err := s.meta_db.AskTvshowEpisode(&q)
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -68,7 +68,7 @@ func (s *Server) scrape_tvshow_season_episode(tvshow_ID int, season int, season_
 	return nil
 }
 
-func (s *Server) scrape_tvshow_season_directory(tvshow_ID int, season int, path string) error {
+func (s *Scraper) scrape_tvshow_season_directory(tvshow_ID int, season int, path string) error {
 	season_list, err := os.ReadDir(path)
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func (s *Server) scrape_tvshow_season_directory(tvshow_ID int, season int, path 
 	return nil
 }
 
-func (s *Server) scrape_tvshow_directory(path string, name string) error {
+func (s *Scraper) scrape_tvshow_directory(path string, name string) error {
 	// Interpret tvshow directory name
 	matches := name_and_year_regex.FindStringSubmatch(name)
 
@@ -147,7 +147,7 @@ func (s *Server) scrape_tvshow_directory(path string, name string) error {
 		}
 	}
 
-	show, err := s.scraper.AskTvshow(q)
+	show, err := s.meta_db.AskTvshow(q)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -211,7 +211,7 @@ func (s *Server) scrape_tvshow_directory(path string, name string) error {
 	return nil
 }
 
-func (s *Server) scrape_tvshow_source(source string) {
+func (s *Scraper) scrape_tvshow_source(source string) {
 	log.Println("Scraping source", source)
 
 	source_list, err := os.ReadDir(source)

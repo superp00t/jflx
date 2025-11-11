@@ -5,24 +5,19 @@ import (
 	"log"
 	"net/http"
 	"sort"
-	"sync/atomic"
 	"time"
 
 	"github.com/superp00t/jflx/cache"
-	"github.com/superp00t/jflx/conf"
+	"github.com/superp00t/jflx/config"
 	"github.com/superp00t/jflx/media/httpdirectory"
-	"github.com/superp00t/jflx/meta"
 )
 
 type Server struct {
 	// the configuration
-	config conf.Server
+	config config.ServerConfig
 	// http path router
 	serve_mux *http.ServeMux
 	server    *http.Server
-	scraper   meta.Source
-	// signals whether scraper is active
-	scraper_status atomic.Bool
 	// volumes
 	volumes map[string]*Volume
 	// auth
@@ -115,7 +110,6 @@ func (s *Server) init() (err error) {
 	s.init_volumes()
 
 	s.serve_mux = http.NewServeMux()
-	s.serve_mux.HandleFunc("POST /api/v1/refresh", s.handle_post_refresh)
 	s.serve_mux.HandleFunc("/media/", s.handle_get_list_volumes)
 	s.serve_mux.HandleFunc("/media/{volume}/", s.handle_volume)
 

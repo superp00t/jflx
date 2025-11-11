@@ -1,4 +1,4 @@
-package conf
+package config
 
 import (
 	"fmt"
@@ -71,7 +71,7 @@ func (mks *MediaKinds) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type Volume struct {
+type VolumeConfig struct {
 	Kinds MediaKinds
 	// Handle: determines what the URL prefix will be i.e. (/media/{Handle}/movie.mp4)
 	Handle string
@@ -87,7 +87,7 @@ type Volume struct {
 	UserGroup string
 }
 
-type LDAP struct {
+type LDAPConfig struct {
 	// "dn=example,dn=com"
 	BaseDN string
 	// LDAP server
@@ -100,11 +100,11 @@ type LDAP struct {
 	CacheExpiry time.Duration
 }
 
-type Server struct {
+type ServerConfig struct {
 	ListenAddress string
 	TMDBScrapeKey string
-	Volumes       []Volume
+	Volumes       []VolumeConfig
 	Tokens        []string
 	AuthProvider  string
-	LDAP          LDAP
+	LDAP          LDAPConfig
 }

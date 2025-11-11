@@ -4,13 +4,13 @@ import (
 	tmdb "github.com/cyruzin/golang-tmdb"
 )
 
-type TMDBScraper struct {
+type DatabaseTMDB struct {
 	cached_tv_details map[int]*tmdb.TVDetails
 	Client            *tmdb.Client
 }
 
-func NewTMDBScraper(key, userAgent string) (t *TMDBScraper, err error) {
-	t = new(TMDBScraper)
+func NewDatabaseTMDB(key, userAgent string) (t *DatabaseTMDB, err error) {
+	t = new(DatabaseTMDB)
 	t.cached_tv_details = make(map[int]*tmdb.TVDetails)
 	t.Client, err = tmdb.Init(key)
 	return

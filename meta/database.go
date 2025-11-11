@@ -37,7 +37,7 @@ type TvshowEpisodeAnswer struct {
 	Artwork
 }
 
-type Source interface {
+type Database interface {
 	AskMovie(q *ShowQuestion) (*MovieAnswer, error)
 	AskTvshow(q *ShowQuestion) (*TvshowAnswer, error)
 	AskTvshowEpisode(q *EpisodeQuestion) (*TvshowEpisodeAnswer, error)

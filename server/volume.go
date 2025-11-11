@@ -11,11 +11,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/superp00t/jflx/conf"
+	"github.com/superp00t/jflx/config"
 )
 
 type Volume struct {
-	config  conf.Volume
+	config  config.VolumeConfig
 	handler http.Handler
 }
 

@@ -7,7 +7,7 @@ import (
 	"github.com/superp00t/jflx/meta/nfo"
 )
 
-func (t *TMDBScraper) ask_movie_ID(q *ShowQuestion) (id int, err error) {
+func (t *DatabaseTMDB) ask_movie_ID(q *ShowQuestion) (id int, err error) {
 	sm, err := t.Client.GetSearchMovies(q.Name, map[string]string{
 		"year": strconv.FormatInt(int64(q.Year), 10),
 	})
@@ -20,7 +20,7 @@ func (t *TMDBScraper) ask_movie_ID(q *ShowQuestion) (id int, err error) {
 	return int(sm.Results[0].ID), nil
 }
 
-func (t *TMDBScraper) AskMovie(q *ShowQuestion) (*MovieAnswer, error) {
+func (t *DatabaseTMDB) AskMovie(q *ShowQuestion) (*MovieAnswer, error) {
 	ma := new(MovieAnswer)
 
 	var id int

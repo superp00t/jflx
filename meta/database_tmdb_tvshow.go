@@ -7,7 +7,7 @@ import (
 	"github.com/superp00t/jflx/meta/nfo"
 )
 
-func (t *TMDBScraper) ask_tv_show_ID(q *ShowQuestion) (id int, err error) {
+func (t *DatabaseTMDB) ask_tv_show_ID(q *ShowQuestion) (id int, err error) {
 	sm, err := t.Client.GetSearchTVShow(q.Name, map[string]string{
 		"year": strconv.FormatInt(int64(q.Year), 10),
 	})
@@ -20,7 +20,7 @@ func (t *TMDBScraper) ask_tv_show_ID(q *ShowQuestion) (id int, err error) {
 	return int(sm.Results[0].ID), nil
 }
 
-func (t *TMDBScraper) get_tv_details(id int) (details *tmdb.TVDetails, err error) {
+func (t *DatabaseTMDB) get_tv_details(id int) (details *tmdb.TVDetails, err error) {
 	var ok bool
 	details, ok = t.cached_tv_details[id]
 	if ok {
@@ -36,7 +36,7 @@ func (t *TMDBScraper) get_tv_details(id int) (details *tmdb.TVDetails, err error
 	return
 }
 
-func (t *TMDBScraper) AskTvshow(q *ShowQuestion) (tvshow *TvshowAnswer, err error) {
+func (t *DatabaseTMDB) AskTvshow(q *ShowQuestion) (tvshow *TvshowAnswer, err error) {
 	tvshow = new(TvshowAnswer)
 
 	var id int
@@ -97,7 +97,7 @@ func (t *TMDBScraper) AskTvshow(q *ShowQuestion) (tvshow *TvshowAnswer, err erro
 	return
 }
 
-func (t *TMDBScraper) AskTvshowEpisode(q *EpisodeQuestion) (episode *TvshowEpisodeAnswer, err error) {
+func (t *DatabaseTMDB) AskTvshowEpisode(q *EpisodeQuestion) (episode *TvshowEpisodeAnswer, err error) {
 	episode = new(TvshowEpisodeAnswer)
 
 	var (

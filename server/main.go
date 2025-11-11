@@ -4,8 +4,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-
-	"github.com/superp00t/jflx/conf"
 )
 
 func Main() {
@@ -13,9 +11,8 @@ func Main() {
 
 	configLocation := filepath.Join(wd, "server.conf")
 
-	s := new(Server)
-	err := conf.LoadServer(configLocation, &s.config)
-	if err != nil {
+	var s Server
+	if err := s.config.Load(configLocation); err != nil {
 		log.Fatal(err)
 		return
 	}

@@ -1,4 +1,4 @@
-package server
+package scraper
 
 import (
 	"io/fs"
@@ -12,7 +12,7 @@ import (
 	"github.com/superp00t/jflx/meta/nfo"
 )
 
-func (s *Server) scrape_movie_directory(path string, info fs.FileInfo) error {
+func (s *Scraper) scrape_movie_directory(path string, info fs.FileInfo) error {
 	// Interpret movie directory name
 	matches := name_and_year_regex.FindStringSubmatch(info.Name())
 
@@ -73,7 +73,7 @@ func (s *Server) scrape_movie_directory(path string, info fs.FileInfo) error {
 		}
 	}
 
-	movi, err := s.scraper.AskMovie(q)
+	movi, err := s.meta_db.AskMovie(q)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -117,7 +117,7 @@ func (s *Server) scrape_movie_directory(path string, info fs.FileInfo) error {
 	return nil
 }
 
-func (s *Server) scrape_movie_source(source string) {
+func (s *Scraper) scrape_movie_source(source string) {
 	log.Println("Scraping source", source)
 
 	if err := filepath.Walk(source, func(path string, info fs.FileInfo, err error) error {
