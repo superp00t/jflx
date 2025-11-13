@@ -9,7 +9,7 @@ import (
 
 var ScrapeTVShow = cobra.Command{
 	Use: "tvshow path",
-	Run: run_scrape_movie,
+	Run: run_scrape_tvshow,
 }
 
 func init() {
